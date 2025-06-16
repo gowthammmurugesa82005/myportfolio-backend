@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 // ✅ Add your deployed frontend URL here (NO trailing slash)
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://myportfolio-frontend-ie3av5bl7-gowthams-projects-7cff2d38.vercel.app'
+  'https://myportfolio-frontend-ie3av5bl7-gowthams-projects-7cff2d38.vercel.app','https://gowthampersonalportfolio.vercel.app'
 ];
 
 app.use(cors({
