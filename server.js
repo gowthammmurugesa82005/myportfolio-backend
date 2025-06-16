@@ -1,17 +1,17 @@
-// Import necessary modules
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ CORS setup (no trailing slashes!)
+// ✅ Add your deployed frontend URL here (NO trailing slash)
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://myportfolio-frontend-cda8d2fam-gowthams-projects-7cff2d38.vercel.app'
+  'https://myportfolio-frontend-ie3av5bl7-gowthams-projects-7cff2d38.vercel.app'
 ];
 
 app.use(cors({
@@ -19,20 +19,17 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS not allowed for this origin: ${origin}`));
+      callback(new Error('CORS not allowed for this origin: ' + origin));
     }
-  },
-  methods: ['GET', 'POST'],
-  credentials: true
+  }
 }));
 
-// Enable parsing of JSON
 app.use(express.json());
 
-// Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 let model;
 
+// Initialize Gemini Model
 (async () => {
   try {
     model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -43,21 +40,22 @@ let model;
   }
 })();
 
-// Health check route
+// Health Check Route
 app.get('/', (req, res) => {
   res.send('✅ Gemini server running!');
 });
 
-// Main AI route
+// AI Chat Route
 app.post('/ask', async (req, res) => {
   const { question, pageContent } = req.body;
 
   if (!question || !pageContent) {
-    return res.status(400).json({ error: '❌ Missing input: question or pageContent.' });
+    return res.status(400).json({ error: '❌ Missing input content (question or pageContent).' });
   }
 
   if (!model) {
-    return res.status(500).json({ error: '❌ Gemini model is not initialized.' });
+    console.error('❌ Gemini model not initialized.');
+    return res.status(500).json({ error: '❌ Gemini AI model is not ready.' });
   }
 
   try {
@@ -66,12 +64,11 @@ app.post('/ask', async (req, res) => {
     const reply = result?.response?.text() || '⚠️ No response from Gemini.';
     res.json({ reply });
   } catch (error) {
-    console.error('❌ Error during content generation:', error.message);
+    console.error('❌ Gemini Error during content generation:', error.message);
     res.status(500).json({ error: '❌ Gemini AI failed to respond.' });
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
